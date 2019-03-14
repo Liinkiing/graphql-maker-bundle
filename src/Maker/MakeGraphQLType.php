@@ -197,12 +197,6 @@ class MakeGraphQLType extends AbstractMaker
                 $this->io->writeln('');
 
                 $type = null;
-            } elseif (!\in_array($type, $allValidTypes, true)) {
-                $this->printAvailableTypes();
-                $this->io->error(sprintf('Invalid type "%s".', $type));
-                $this->io->writeln('');
-
-                $type = null;
             }
         }
 
@@ -216,7 +210,7 @@ class MakeGraphQLType extends AbstractMaker
     {
         $this->io->writeln('<fg=green>Available types (</><fg=yellow>excluding custom scalars</><fg=green>)</>');
         foreach (self::AVAILABLE_FIELD_TYPES as $FIELD_TYPE) {
-            $this->io->writeln("  - <fg=yellow>$FIELD_TYPE</>");
+            $this->io->writeln("  - <fg=yellow>$FIELD_TYPE</> (or <fg=yellow>[$FIELD_TYPE]</>)");
         }
         $this->io->writeln('');
     }
