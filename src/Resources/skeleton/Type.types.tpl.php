@@ -1,14 +1,20 @@
-<?= $name ?>:
+<?= $name ?>:<?= "\n" ?>
   type: <?= "$type\n" ?>
 <?php if ($inherits && count($inherits) > 0) { ?>
-  inherits: [<?= implode(', ', $inherits) ?>]
+  inherits: [<?= implode(', ', $inherits) ?>]<?= "\n" ?>
 <?php } ?>
-  config:
+  config:<?= "\n" ?>
 <?php if ($interfaces && count($interfaces) > 0) { ?>
-    interfaces: [<?= implode(', ', $interfaces) ?>]
+    interfaces: [<?= implode(', ', $interfaces) ?>]<?= "\n" ?>
 <?php } ?>
-    description: A super description
-    fields:
-      title:
-        type: String!
-        description: An inspiring title
+<?php if ($description) { ?>
+    description: <?= $description === '' ? "~\n" : "$description\n" ?>
+<?php } ?>
+<?php if ($hasFields && $fields && count($fields) > 0) { ?>
+    fields:<?= "\n" ?>
+<?php foreach ($fields as $field) { ?>
+      <?= $field['name'] ?>:<?= "\n" ?>
+        type: <?= $field['type'] ?><?= ($field['nullable'] === true) ? '' : '!' ?><?= "\n" ?>
+        description: <?= $field['description'] ?? '~' ?><?= "\n" ?>
+<?php } ?>
+<?php } ?>
