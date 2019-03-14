@@ -10,5 +10,8 @@
         <service id="maker.maker.graphql_type" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLType">
             <tag name="maker.command" />
         </service>
+        <service id="maker.maker.graphql_connection" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLConnection">
+            <tag name="maker.command" />
+        </service>
     </services>
 </container>

@@ -7,11 +7,12 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 
-class MakeGraphQLType extends CustomMaker
+class MakeGraphQLConnection extends CustomMaker
 {
 
     /**
@@ -21,7 +22,7 @@ class MakeGraphQLType extends CustomMaker
      */
     public static function getCommandName(): string
     {
-        return 'make:graphql:type';
+        return 'make:graphql:connection';
     }
 
     /**
@@ -36,8 +37,8 @@ class MakeGraphQLType extends CustomMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setDescription('Creates a new GraphQL type')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a type name (e.g. <fg=yellow>Post</>)'));
+            ->setDescription('Creates a new relay-compliant GraphQL connection')
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a connection name (e.g. <fg=yellow>PostConnection</>)'));
     }
 
     /**
@@ -62,24 +63,19 @@ class MakeGraphQLType extends CustomMaker
     {
         $this->io = $io;
         $name = ucfirst($input->getArgument('name'));
+        if (!Str::hasSuffix($name, 'Connection')) {
+            $name .= 'Connection';
+        }
         if ($name) {
-            $type = $this->askQuestion(
-                'What is your object type? (e.g. <fg=yellow>object, interface, enum</>)',
-                'object',
-                self::AVAILABLE_OBJECT_TYPES
+            $nodeType = $this->askQuestion(
+                'What is your connection node type? (the related type in which the connection refers to)'
             );
-            $description = $this->askQuestion(
-                'What is your type description?',
-                "I am the $name description!"
+            $nodeTypeNullable = $this->askConfirmationQuestion(
+                'Is your node type nullable?', false
             );
-            $inherits = $this->askQuestion(
-                'Does your type inherits any other types? (e.g. <fg=yellow>Comment, Video</> or leave it blank for none)'
+            $hasFields = $this->askConfirmationQuestion(
+                'Do you want to add custom fields to your connection?', false
             );
-            $interfaces = $this->askQuestion(
-                'Does your type have any interfaces? (e.g. <fg=yellow>Node, Commentable</> or leave it blank for none)'
-            );
-
-            $hasFields = $this->askConfirmationQuestion('Do you want to add fields?');
 
             $isFirstField = true;
             $fields = [];
@@ -97,15 +93,13 @@ class MakeGraphQLType extends CustomMaker
 
             $generator->generateFile(
                 "config/graphql/types/{$name}.types.yaml",
-                __DIR__ . '/../Resources/skeleton/Type.types.tpl.php',
+                __DIR__ . '/../Resources/skeleton/Connection.types.tpl.php',
                 [
                     'name' => $name,
-                    'type' => $type,
-                    'description' => $description,
+                    'nodeType' => $nodeType,
+                    'nodeTypeNullable' => $nodeTypeNullable,
                     'hasFields' => $hasFields,
-                    'fields' => $fields,
-                    'inherits' => array_map('trim', explode(', ', $inherits ?? '')),
-                    'interfaces' => array_map('trim', explode(', ', $interfaces ?? '')),
+                    'fields' => $fields
                 ]
             );
 
