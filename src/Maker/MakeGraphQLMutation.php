@@ -2,7 +2,7 @@
 
 namespace Liinkiing\GraphQLMakerBundle\Maker;
 
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Liinkiing\GraphQLMakerBundle\Utils\Validator;
 use Overblog\GraphQLBundle\OverblogGraphQLBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -11,6 +11,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class MakeGraphQLMutation extends CustomMaker
 {
@@ -22,12 +23,16 @@ class MakeGraphQLMutation extends CustomMaker
         '@=isAuthenticated()',
         "@=hasPermission(object, 'OWNER')"
     ];
-    private $templatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
-    private $targetPath = 'config/graphql/types/Mutation.types.yaml';
+    private const EXPRESSION_LANGUAGE_DOC_URL = 'https://github.com/overblog/GraphQLBundle/blob/master/docs/definitions/expression-language.md';
+    private $mutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
+    private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.tpl.php';
+    private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.tpl.php';
+    private $typesPath = 'config/graphql/types/';
+    private $mutationFilename = 'Mutation.types.yaml';
 
-    private function getTargetPath(): string
+    private function getMutationTargetPath(): string
     {
-        return $this->rootDir . DIRECTORY_SEPARATOR . $this->targetPath;
+        return $this->rootDir . DIRECTORY_SEPARATOR . $this->typesPath . $this->mutationFilename;
     }
 
 
@@ -52,9 +57,9 @@ class MakeGraphQLMutation extends CustomMaker
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        if (!file_exists($this->getTargetPath())) {
-            $this->targetPath = 'config/graphql/types/Mutation.types.yml';
-            if (!file_exists($this->getTargetPath())) {
+        if (!file_exists($this->getMutationTargetPath())) {
+            $this->mutationFilename = 'Mutation.types.yml';
+            if (!file_exists($this->getMutationTargetPath())) {
                 throw new FileNotFoundException('You must create your Mutation type file before adding new mutations');
             }
         }
@@ -99,19 +104,41 @@ class MakeGraphQLMutation extends CustomMaker
             if ($hasAccess) {
                 $this->printAccessExpressionsExamples();
                 $access = $this->askQuestion(
-                    'Please type your access expression'
+                    'Please type your access expression',
+                    null,
+                    null,
+                    [Validator::class, 'notBlank']
                 );
             }
 
-            $content = file_get_contents($this->getTargetPath());
+
+
+            $content = file_get_contents($this->getMutationTargetPath());
+
+            $inputName = ucfirst($name).'Input';
+            $payloadName = ucfirst($name).'Payload';
 
             $content .= $this->parseTemplate(
-                $this->templatePath,
-                compact('access', 'hasAccess', 'name', 'description')
+                $this->mutationTemplatePath,
+                compact('access', 'hasAccess', 'name', 'description', 'inputName', 'payloadName')
             );
             $generator->dumpFile(
-                $this->targetPath,
+                $this->getMutationTargetPath(),
                 $content
+            );
+            $generator->generateFile(
+                $this->typesPath.$inputName.'.types.yaml',
+                $this->inputTemplatePath,
+                [
+
+                ]
+            );
+            $generator->generateFile(
+                $this->getMutationTargetPath().$payloadName.'.types.yaml',
+                $this->payloadTemplatePath,
+                [
+
+                ]
             );
             $generator->writeChanges();
             $this->writeSuccessMessage($io);
@@ -119,13 +146,14 @@ class MakeGraphQLMutation extends CustomMaker
 
     }
 
-    private function printAccessExpressionsExamples() {
+    private function printAccessExpressionsExamples()
+    {
         $this->io->writeln('<fg=green>Custom access expressions examples</>');
         foreach (self::ACCESS_EXAMPLES as $ACCESS) {
-            $this->io->writeln("  - <fg=yellow>$ACCESS</>)");
+            $this->io->writeln("  - <fg=yellow>$ACCESS</>add");
         }
         $this->io->writeln('');
-        $this->io->comment('More informations here: https://github.com/overblog/GraphQLBundle/blob/master/docs/definitions/expression-language.md');
+        $this->io->comment('More informations here: ' . self::EXPRESSION_LANGUAGE_DOC_URL . '');
     }
 
 }

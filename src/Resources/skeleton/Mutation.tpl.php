@@ -8,6 +8,6 @@
 <?php } ?>
         builder: 'Relay::Mutation'<?= "\n" ?>
         builderConfig:<?= "\n" ?>
-          inputType: <?= ucfirst($name).'Input' ?><?= "\n" ?>
-          payloadType: <?= ucfirst($name).'Payload' ?><?= "\n" ?>
+          inputType: <?= $inputName ?><?= "\n" ?>
+          payloadType: <?= $payloadName ?><?= "\n" ?>
           mutateAndGetPayload: '@=mutation("App\\GraphQL\\Mutation\\<?= ucfirst($name).'Mutation' ?>", [value])'<?= "\n" ?>
