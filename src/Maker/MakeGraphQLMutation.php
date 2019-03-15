@@ -90,12 +90,12 @@ class MakeGraphQLMutation extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
-        $name = $input->getArgument('name');
+        $mutationName = $input->getArgument('name');
 
-        if ($name) {
+        if ($mutationName) {
             $description = $this->askQuestion(
                 'What is your mutation description?',
-                "I am the $name description"
+                "I am the $mutationName description"
             );
             $hasAccess = $this->askConfirmationQuestion(
                 'Do you want to add custom access for this mutation?', false
@@ -114,51 +114,24 @@ class MakeGraphQLMutation extends CustomMaker
 
             $content = file_get_contents($this->getMutationTargetPath());
 
-            $inputName = ucfirst($name) . 'Input';
-            $payloadName = ucfirst($name) . 'Payload';
+            $inputName = ucfirst($mutationName) . 'Input';
+            $payloadName = ucfirst($mutationName) . 'Payload';
 
             $content .= $this->parseTemplate(
                 $this->mutationTemplatePath,
-                compact('access', 'hasAccess', 'name', 'description', 'inputName', 'payloadName')
+                compact('access', 'hasAccess', 'mutationName', 'description', 'inputName', 'payloadName')
             );
             $generator->dumpFile(
                 $this->getMutationTargetPath(),
                 $content
             );
 
-            $this->io->writeln("Now, let's configure $inputName and $payloadName!");
+            $this->writelnSpaced("Now, let's configure $inputName!");
+            $this->generateMutationInput($generator, $inputName, $mutationName);
 
-            $inputDescription = $this->askQuestion(
-                "<fg=yellow>$inputName</> - What is your mutation input description?",
-                "Input of $name mutation"
-            );
+            $this->writelnSpaced("Now, let's configure $payloadName!");
+            $this->generateMutationPayload($generator, $payloadName, $mutationName);
 
-            $this->io->writeln("Now, let's add some fields to the $inputName");
-
-            $isFirstField = true;
-            $inputFields = [];
-            while (true) {
-                $newField = $this->askForNextField($isFirstField);
-                $inputFields[] = $newField;
-                $isFirstField = false;
-                if (null === $newField) {
-                    $inputFields = array_filter($inputFields);
-                    break;
-                }
-            }
-
-            $generator->generateFile(
-                $this->typesPath . $inputName . '.types.yaml',
-                $this->inputTemplatePath,
-                compact('inputName', 'inputFields', 'inputDescription')
-            );
-//            $generator->generateFile(
-//                $this->getMutationTargetPath() . $payloadName . '.types.yaml',
-//                $this->payloadTemplatePath,
-//                [
-//
-//                ]
-//            );
             $generator->writeChanges();
             $this->writeSuccessMessage($io);
         }
@@ -173,6 +146,62 @@ class MakeGraphQLMutation extends CustomMaker
         }
         $this->io->writeln('');
         $this->io->comment('More informations here: ' . self::EXPRESSION_LANGUAGE_DOC_URL . '');
+    }
+
+    protected function generateMutationInput(Generator $generator, string $inputName, $name): void
+    {
+        $inputDescription = $this->askQuestion(
+            "<fg=yellow>$inputName</> - What is your mutation input description?",
+            "Input of $name mutation"
+        );
+
+        $this->io->writeln("Now, let's add some fields to the $inputName");
+
+        $isFirstField = true;
+        $inputFields = [];
+        while (true) {
+            $newField = $this->askForNextField($isFirstField);
+            $inputFields[] = $newField;
+            $isFirstField = false;
+            if (null === $newField) {
+                $inputFields = array_filter($inputFields);
+                break;
+            }
+        }
+
+        $generator->generateFile(
+            $this->typesPath . $inputName . '.types.yaml',
+            $this->inputTemplatePath,
+            compact('inputName', 'inputFields', 'inputDescription')
+        );
+    }
+
+    protected function generateMutationPayload(Generator $generator, string $payloadName, $name): void
+    {
+        $payloadDescription = $this->askQuestion(
+            "<fg=yellow>$payloadName</> - What is your mutation payload description?",
+            "Payload of $name mutation"
+        );
+
+        $this->io->writeln("Now, let's add some fields to the $payloadName");
+
+        $isFirstField = true;
+        $payloadFields = [];
+        while (true) {
+            $newField = $this->askForNextField($isFirstField);
+            $payloadFields[] = $newField;
+            $isFirstField = false;
+            if (null === $newField) {
+                $payloadFields = array_filter($payloadFields);
+                break;
+            }
+        }
+
+        $generator->generateFile(
+            $this->typesPath . $payloadName . '.types.yaml',
+            $this->payloadTemplatePath,
+            compact('payloadName', 'payloadFields', 'payloadDescription')
+        );
     }
 
 }

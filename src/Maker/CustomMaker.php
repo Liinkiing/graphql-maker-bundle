@@ -65,7 +65,7 @@ abstract class CustomMaker extends AbstractMaker
         while (null === $type) {
             $question = new Question('Field type (enter <comment>?</comment> to see all types)', $defaultType);
             $question->setAutocompleterValues($allValidTypes);
-            $type = $this->io->askQuestion($question);
+            $type = str_replace('!', '', $this->io->askQuestion($question));
 
             if ('?' === $type) {
                 $this->printAvailableTypes();
@@ -74,9 +74,8 @@ abstract class CustomMaker extends AbstractMaker
                 $type = null;
             }
         }
-
-        $description = $this->askQuestion('Field description?', "I am the $name description");
         $nullable = $this->io->confirm('Can this field be nullable', false);
+        $description = $this->askQuestion('Field description?', "I am the $name description");
 
         return compact('name', 'type', 'description', 'nullable');
     }
@@ -113,6 +112,13 @@ abstract class CustomMaker extends AbstractMaker
             $question->setValidator($validator);
         }
         return $this->io->askQuestion($question);
+    }
+
+    protected function writelnSpaced($message): void
+    {
+        $this->io->writeln('');
+        $this->io->writeln($message);
+        $this->io->writeln('');
     }
 
     public function parseTemplate(string $templatePath, array $parameters): string
