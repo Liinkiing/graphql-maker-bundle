@@ -25,8 +25,8 @@ class MakeGraphQLMutation extends CustomMaker
     ];
     private const EXPRESSION_LANGUAGE_DOC_URL = 'https://github.com/overblog/GraphQLBundle/blob/master/docs/definitions/expression-language.md';
     private $mutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
-    private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.tpl.php';
-    private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.tpl.php';
+    private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.types.tpl.php';
+    private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.types.tpl.php';
     private $typesPath = 'config/graphql/types/';
     private $mutationFilename = 'Mutation.types.yaml';
 
@@ -112,11 +112,10 @@ class MakeGraphQLMutation extends CustomMaker
             }
 
 
-
             $content = file_get_contents($this->getMutationTargetPath());
 
-            $inputName = ucfirst($name).'Input';
-            $payloadName = ucfirst($name).'Payload';
+            $inputName = ucfirst($name) . 'Input';
+            $payloadName = ucfirst($name) . 'Payload';
 
             $content .= $this->parseTemplate(
                 $this->mutationTemplatePath,
@@ -126,20 +125,40 @@ class MakeGraphQLMutation extends CustomMaker
                 $this->getMutationTargetPath(),
                 $content
             );
+
+            $this->io->writeln("Now, let's configure $inputName and $payloadName!");
+
+            $inputDescription = $this->askQuestion(
+                "<fg=yellow>$inputName</> - What is your mutation input description?",
+                "Input of $name mutation"
+            );
+
+            $this->io->writeln("Now, let's add some fields to the $inputName");
+
+            $isFirstField = true;
+            $inputFields = [];
+            while (true) {
+                $newField = $this->askForNextField($isFirstField);
+                $inputFields[] = $newField;
+                $isFirstField = false;
+                if (null === $newField) {
+                    $inputFields = array_filter($inputFields);
+                    break;
+                }
+            }
+
             $generator->generateFile(
-                $this->typesPath.$inputName.'.types.yaml',
+                $this->typesPath . $inputName . '.types.yaml',
                 $this->inputTemplatePath,
-                [
-
-                ]
+                compact('inputName', 'inputFields', 'inputDescription')
             );
-            $generator->generateFile(
-                $this->getMutationTargetPath().$payloadName.'.types.yaml',
-                $this->payloadTemplatePath,
-                [
-
-                ]
-            );
+//            $generator->generateFile(
+//                $this->getMutationTargetPath() . $payloadName . '.types.yaml',
+//                $this->payloadTemplatePath,
+//                [
+//
+//                ]
+//            );
             $generator->writeChanges();
             $this->writeSuccessMessage($io);
         }
