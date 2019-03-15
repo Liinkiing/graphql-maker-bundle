@@ -8,9 +8,15 @@
         <defaults public="false" />
 
         <service id="maker.maker.graphql_type" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLType">
+            <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
         </service>
         <service id="maker.maker.graphql_connection" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLConnection">
+            <argument>%kernel.project_dir%</argument>
+            <tag name="maker.command" />
+        </service>
+        <service id="maker.maker.graphql_query" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLQuery">
+            <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
         </service>
     </services>

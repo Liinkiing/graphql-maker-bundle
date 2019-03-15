@@ -17,6 +17,12 @@ abstract class CustomMaker extends AbstractMaker
      * @var SymfonyStyle $io
      */
     protected $io;
+    protected $rootDir;
+
+    public function __construct(string $rootDir)
+    {
+        $this->rootDir = $rootDir;
+    }
 
     protected function printAvailableTypes(): void
     {
@@ -107,5 +113,14 @@ abstract class CustomMaker extends AbstractMaker
             $question->setValidator($validator);
         }
         return $this->io->askQuestion($question);
+    }
+
+    public function parseTemplate(string $templatePath, array $parameters): string
+    {
+        ob_start();
+        extract($parameters, EXTR_SKIP);
+        include $templatePath;
+
+        return ob_get_clean();
     }
 }
