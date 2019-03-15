@@ -104,9 +104,12 @@ class MakeGraphQLType extends CustomMaker
                     'description' => $description,
                     'hasFields' => $hasFields,
                     'fields' => $fields,
-                    'inherits' => array_map('trim', explode(', ', $inherits ?? '')),
-                    'interfaces' => array_map('trim', explode(', ', $interfaces ?? '')),
-                ]
+                    'inherits' => array_filter(
+                        array_map('trim', explode(', ', $inherits ?? '')),
+                        function ($item) { return $item !== ''; }),
+                    'interfaces' => array_filter(
+                        array_map('trim', explode(', ', $interfaces ?? '')),
+                        function ($item) { return $item !== ''; })                ]
             );
 
             $generator->writeChanges();
