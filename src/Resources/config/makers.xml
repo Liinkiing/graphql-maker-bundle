@@ -19,5 +19,9 @@
             <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
         </service>
+        <service id="maker.maker.graphql_mutation" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLMutation">
+            <argument>%kernel.project_dir%</argument>
+            <tag name="maker.command" />
+        </service>
     </services>
 </container>
