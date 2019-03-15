@@ -24,9 +24,10 @@ class MakeGraphQLMutation extends CustomMaker
         "@=hasPermission(object, 'OWNER')"
     ];
     private const EXPRESSION_LANGUAGE_DOC_URL = 'https://github.com/overblog/GraphQLBundle/blob/master/docs/definitions/expression-language.md';
-    private $mutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
+    private $mutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.fragment.tpl.php';
     private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.types.tpl.php';
     private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.types.tpl.php';
+    private $phpMutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
     private $typesPath = 'config/graphql/types/';
     private $mutationFilename = 'Mutation.types.yaml';
 
@@ -66,7 +67,8 @@ class MakeGraphQLMutation extends CustomMaker
 
         $command
             ->setDescription('Creates a new GraphQL mutation')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'));
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'))
+        ;
     }
 
     /**
@@ -86,6 +88,7 @@ class MakeGraphQLMutation extends CustomMaker
      * @param InputInterface $input
      * @param ConsoleStyle $io
      * @param Generator $generator
+     * @throws \Exception
      */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
@@ -132,6 +135,18 @@ class MakeGraphQLMutation extends CustomMaker
             $this->writelnSpaced("Now, let's configure $payloadName!");
             $this->generateMutationPayload($generator, $payloadName, $mutationName);
 
+            $fcn = "App\\GraphQL\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
+            $generatePhpFiles = $this->askConfirmationQuestion(
+                "Do you want to generate the PHP mutation <fg=yellow>$fcn</>"
+            );
+
+            if ($generatePhpFiles) {
+                $generator->generateClass(
+                    $fcn,
+                    $this->phpMutationTemplatePath
+                );
+            }
+
             $generator->writeChanges();
             $this->writeSuccessMessage($io);
         }
@@ -142,7 +157,7 @@ class MakeGraphQLMutation extends CustomMaker
     {
         $this->io->writeln('<fg=green>Custom access expressions examples</>');
         foreach (self::ACCESS_EXAMPLES as $ACCESS) {
-            $this->io->writeln("  - <fg=yellow>$ACCESS</>add");
+            $this->io->writeln("  - <fg=yellow>$ACCESS</>");
         }
         $this->io->writeln('');
         $this->io->comment('More informations here: ' . self::EXPRESSION_LANGUAGE_DOC_URL . '');

@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 class MakeGraphQLQuery extends CustomMaker
 {
 
-    private $templatePath = __DIR__ . '/../Resources/skeleton/Query.tpl.php';
+    private $templatePath = __DIR__ . '/../Resources/skeleton/Query.fragment.tpl.php';
     private $targetPath = 'config/graphql/types/Query.types.yaml';
 
     private function getTargetPath(): string
