@@ -16,6 +16,7 @@ class MakeGraphQLQuery extends CustomMaker
 {
 
     private $templatePath = __DIR__ . '/../Resources/skeleton/Query.fragment.tpl.php';
+    private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
     private $targetPath = 'config/graphql/types/Query.types.yaml';
 
     private function getTargetPath(): string
@@ -74,6 +75,7 @@ class MakeGraphQLQuery extends CustomMaker
      * @param InputInterface $input
      * @param ConsoleStyle $io
      * @param Generator $generator
+     * @throws \Exception
      */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
@@ -98,6 +100,19 @@ class MakeGraphQLQuery extends CustomMaker
                 $this->targetPath,
                 $content
             );
+
+            $fcn = $this->rootNamespace."\\Resolver\\" . ucfirst($name) . 'Resolver';
+            $generatePhpFiles = $this->askConfirmationQuestion(
+                "Do you want to generate the PHP resolver <fg=yellow>$fcn</>"
+            );
+
+            if ($generatePhpFiles) {
+                $generator->generateClass(
+                    $fcn,
+                    $this->phpResolverTemplatePath
+                );
+            }
+
             $generator->writeChanges();
             $this->writeSuccessMessage($io);
         }

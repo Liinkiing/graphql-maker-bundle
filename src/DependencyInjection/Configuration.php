@@ -25,7 +25,6 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')
-                ->isRequired()
                 ->defaultValue('App\\GraphQL')
                 ->validate()
                     ->ifTrue(function (string $value) {
