@@ -25,7 +25,12 @@ class GraphQLMakerExtension extends Extension
 
         foreach ($container->getDefinitions() as $definition) {
             if ($definition->hasTag('maker.graphql_command')) {
-                $definition->replaceArgument(0, $config['root_namespace']);
+                $definition->replaceArgument(
+                    0,
+                    // Make sure we have two trailing slashes, to prevent issues in YAML to FQCN conversion
+                    // for `resolve` value in generated queries and mutations
+                    str_replace('\\', '\\\\', $config['root_namespace'])
+                );
             }
         }
     }
