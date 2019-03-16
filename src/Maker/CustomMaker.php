@@ -17,6 +17,7 @@ abstract class CustomMaker extends AbstractMaker
      * @var SymfonyStyle $io
      */
     protected $io;
+    protected $typesPath = 'config/graphql/types/';
     protected $rootDir;
     protected $rootNamespace;
 

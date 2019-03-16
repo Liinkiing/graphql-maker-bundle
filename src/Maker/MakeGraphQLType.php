@@ -14,6 +14,9 @@ use Symfony\Component\Console\Input\InputInterface;
 class MakeGraphQLType extends CustomMaker
 {
 
+    private $typeTemplatePath = __DIR__ . '/../Resources/skeleton/Type.types.tpl.php';
+    private $typeFieldsTemplatePath = __DIR__ . '/../Resources/skeleton/Type.fields.fragment.tpl.php';
+
     /**
      * Return the command name for your maker (e.g. make:report).
      *
@@ -22,6 +25,11 @@ class MakeGraphQLType extends CustomMaker
     public static function getCommandName(): string
     {
         return 'make:graphql:type';
+    }
+
+    private function getTypesPath(): string
+    {
+        return $this->rootDir.DIRECTORY_SEPARATOR.$this->typesPath;
     }
 
     /**
@@ -63,23 +71,34 @@ class MakeGraphQLType extends CustomMaker
         $this->io = $io;
         $name = ucfirst($input->getArgument('name'));
         if ($name) {
-            $type = $this->askQuestion(
-                'What is your object type? (e.g. <fg=yellow>object, interface, enum</>)',
-                'object',
-                self::AVAILABLE_OBJECT_TYPES
-            );
-            $description = $this->askQuestion(
-                'What is your type description?',
-                "I am the $name description!"
-            );
-            $inherits = $this->askQuestion(
-                'Does your type inherits any other types? (e.g. <fg=yellow>Comment, Video</> or leave it blank for none)'
-            );
-            $interfaces = $this->askQuestion(
-                'Does your type have any interfaces? (e.g. <fg=yellow>Node, Commentable</> or leave it blank for none)'
-            );
+            $firstTime = !file_exists($this->getTypesPath().$name.'.types.yaml')
+                && !file_exists($this->getTypesPath().$name.'.types.yml');
+            $filename = "$name.types.yaml";
+            if (file_exists($this->getTypesPath().$name.'.types.yml')) {
+                $filename = "$name.types.yml";
+            }
+            if ($firstTime) {
+                $type = $this->askQuestion(
+                    'What is your object type? (e.g. <fg=yellow>object, interface, enum</>)',
+                    'object',
+                    self::AVAILABLE_OBJECT_TYPES
+                );
+                $description = $this->askQuestion(
+                    'What is your type description?',
+                    "I am the $name description!"
+                );
+                $inherits = $this->askQuestion(
+                    'Does your type inherits any other types? (e.g. <fg=yellow>Comment, Video</> or leave it blank for none)'
+                );
+                $interfaces = $this->askQuestion(
+                    'Does your type have any interfaces? (e.g. <fg=yellow>Node, Commentable</> or leave it blank for none)'
+                );
 
-            $hasFields = $this->askConfirmationQuestion('Do you want to add fields?');
+                $hasFields = $this->askConfirmationQuestion('Do you want to add fields?');
+            } else {
+                $this->io->writeln("<fg=green>The <fg=yellow>$name</> type already exists! Let's add some fields.</>");
+                $hasFields = true;
+            }
 
             $isFirstField = true;
             $fields = [];
@@ -95,21 +114,33 @@ class MakeGraphQLType extends CustomMaker
                 }
             }
 
-            $generator->generateFile(
-                "config/graphql/types/{$name}.types.yaml",
-                __DIR__ . '/../Resources/skeleton/Type.types.tpl.php',
-                [
-                    'name' => $name,
-                    'type' => $type,
-                    'description' => $description,
-                    'hasFields' => $hasFields,
-                    'fields' => $fields,
-                    'inherits' => array_filter(
-                        array_map('trim', explode(', ', $inherits ?? '')),
-                        function ($item) { return $item !== ''; }),
-                    'interfaces' => array_filter(
-                        array_map('trim', explode(', ', $interfaces ?? '')),
-                        function ($item) { return $item !== ''; })                ]
+            $content = $firstTime ?
+                $this->parseTemplate(
+                    $this->typeTemplatePath,
+                    [
+                        'name' => $name,
+                        'type' => $type,
+                        'description' => $description,
+                        'hasFields' => $hasFields,
+                        'fields' => $fields,
+                        'inherits' => array_filter(
+                            array_map('trim', explode(', ', $inherits ?? '')),
+                            function ($item) { return $item !== ''; }),
+                        'interfaces' => array_filter(
+                            array_map('trim', explode(', ', $interfaces ?? '')),
+                            function ($item) { return $item !== ''; })                ]
+
+                ) :
+                file_get_contents($this->getTypesPath().$filename);
+
+            $content .= $this->parseTemplate(
+                $this->typeFieldsTemplatePath,
+                compact('fields')
+            );
+
+            $generator->dumpFile(
+                $this->getTypesPath().$filename,
+                $content
             );
 
             $generator->writeChanges();

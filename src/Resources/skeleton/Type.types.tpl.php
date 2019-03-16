@@ -10,11 +10,12 @@
 <?php if ($description) { ?>
     description: <?= $description === '' ? "~\n" : "'$description'\n" ?>
 <?php } ?>
-<?php if ($hasFields && $fields && count($fields) > 0) { ?>
+<?php if (!$fields) { ?>
     fields:<?= "\n" ?>
-<?php foreach ($fields as $field) { ?>
-      <?= $field['name'] ?>:<?= "\n" ?>
-        type: '<?= $field['type'] ?><?= ($field['nullable'] === true) ? '' : '!' ?>'<?= "\n" ?>
-        description: <?= "'" . $field['description'] . "'" ?? '~' ?><?= "\n" ?>
+      id:<?= "\n" ?>
+        type: 'ID!'<?= "\n" ?>
+        description: 'The <?= $name ?> id'<?= "\n" ?>
 <?php } ?>
+<?php if ($fields) { ?>
+    fields:<?= "\n" ?>
 <?php } ?>

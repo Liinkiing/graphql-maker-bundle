@@ -29,7 +29,6 @@ class MakeGraphQLMutation extends CustomMaker
     private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.types.tpl.php';
     private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.types.tpl.php';
     private $phpMutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
-    private $typesPath = 'config/graphql/types/';
     private $mutationFilename = 'Mutation.types.yaml';
 
     private function getMutationTargetPath(): string
