@@ -85,18 +85,14 @@ class MakeGraphQLQuery extends CustomMaker
                 'What is your query description?',
                 "Get $name"
             );
-            $type = $this->askQuestion(
-                'What is your query type?'
-            );
-            $typeNullable = $this->askConfirmationQuestion(
-                'Is your query type nullable?', false
-            );
+            [$type, $nullable] = $this->askFieldType(self::AVAILABLE_FIELD_TYPES[0]);
 
             $content = file_get_contents($this->getTargetPath());
+            $rootNamespace = $this->rootNamespace;
 
             $content .= $this->parseTemplate(
                 $this->templatePath,
-                compact('name', 'description', 'type', 'typeNullable')
+                compact('name', 'description', 'rootNamespace', 'type', 'nullable')
             );
             $generator->dumpFile(
                 $this->targetPath,

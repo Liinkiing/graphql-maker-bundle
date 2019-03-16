@@ -119,10 +119,11 @@ class MakeGraphQLMutation extends CustomMaker
 
             $inputName = ucfirst($mutationName) . 'Input';
             $payloadName = ucfirst($mutationName) . 'Payload';
+            $rootNamespace = $this->rootNamespace;
 
             $content .= $this->parseTemplate(
                 $this->mutationTemplatePath,
-                compact('access', 'hasAccess', 'mutationName', 'description', 'inputName', 'payloadName')
+                compact('access', 'hasAccess', 'rootNamespace', 'mutationName', 'description', 'inputName', 'payloadName')
             );
             $generator->dumpFile(
                 $this->getMutationTargetPath(),
@@ -134,8 +135,7 @@ class MakeGraphQLMutation extends CustomMaker
 
             $this->writelnSpaced("Now, let's configure $payloadName!");
             $this->generateMutationPayload($generator, $payloadName, $mutationName);
-
-            $fcn = "App\\GraphQL\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
+            $fcn = $this->rootNamespace."\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
             $generatePhpFiles = $this->askConfirmationQuestion(
                 "Do you want to generate the PHP mutation <fg=yellow>$fcn</>"
             );

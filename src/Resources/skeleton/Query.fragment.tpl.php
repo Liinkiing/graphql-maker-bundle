@@ -1,11 +1,11 @@
       <?= $name ?>:<?= "\n" ?>
         description: '<?= $description ?? '' ?>'<?= "\n" ?>
 <?php if ($type) { ?>
-        type: '<?= $type ?><?= ($typeNullable === true) ? '' : '!' ?>'<?= "\n" ?>
+        type: '<?= $type ?><?= ($nullable === true) ? '' : '!' ?>'<?= "\n" ?>
 <?php } ?>
         # If you want to use a Relay connection<?= "\n" ?>
         # argsBuilder: Relay::Connection<?= "\n" ?>
-        # resolve: '@=resolver("App\\GraphQL\\Resolver\\Query\\<?= ucfirst($name).'Resolver' ?>", [args])'<?= "\n" ?>
+        # resolve: '@=resolver("<?= $rootNamespace ?>\\Resolver\\Query\\<?= ucfirst($name).'Resolver' ?>", [args])'<?= "\n" ?>
         # args:<?= "\n" ?>
         # Put here your custom args for you query (if any)<?= "\n" ?>
           # first:<?= "\n" ?>
