@@ -7,4 +7,4 @@
         builderConfig:<?= "\n" ?>
           inputType: <?= $inputName ?><?= "\n" ?>
           payloadType: <?= $payloadName ?><?= "\n" ?>
-          mutateAndGetPayload: '@=mutation("<?= $rootNamespace ?>\\Mutation\\<?= ucfirst($mutationName).'Mutation' ?>", [value])'<?= "\n" ?>
+          mutateAndGetPayload: '@=mutation("<?= str_replace('\\', '\\\\', $rootNamespace) ?>\\Mutation\\<?= ucfirst($mutationName).'Mutation' ?>", [value])'<?= "\n" ?>

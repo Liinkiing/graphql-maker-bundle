@@ -24,7 +24,15 @@ class Configuration implements ConfigurationInterface
         }
         $rootNode
             ->children()
-            ->scalarNode('root_namespace')->defaultValue('App\\GraphQL')->end()
+                ->scalarNode('root_namespace')
+                ->isRequired()
+                ->defaultValue('App\\GraphQL')
+                ->validate()
+                    ->ifTrue(function (string $value) {
+                       return substr($value, -1) === '\\';
+                    })
+                    ->thenInvalid('%s does not seems to be a valid namespace')
+                ->end()
             ->end()
         ;
         return $treeBuilder;
