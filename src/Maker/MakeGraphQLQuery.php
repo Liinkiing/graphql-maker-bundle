@@ -15,7 +15,9 @@ use Symfony\Component\Console\Input\InputInterface;
 class MakeGraphQLQuery extends CustomMaker
 {
 
+    private $firstTime = false;
     private $templatePath = __DIR__ . '/../Resources/skeleton/Query.fragment.tpl.php';
+    private $yamlTemplatePath = __DIR__ . '/../Resources/skeleton/Query.yaml.tpl.php';
     private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
     private $targetPath = 'config/graphql/types/Query.types.yaml';
 
@@ -49,7 +51,7 @@ class MakeGraphQLQuery extends CustomMaker
         if (!file_exists($this->getTargetPath())) {
             $this->targetPath = 'config/graphql/types/Query.types.yml';
             if (!file_exists($this->getTargetPath())) {
-                throw new FileNotFoundException('You must create your Query type file before adding new queries');
+                $this->firstTime = true;
             }
         }
 
@@ -89,8 +91,11 @@ class MakeGraphQLQuery extends CustomMaker
             );
             [$type, $nullable] = $this->askFieldType(self::AVAILABLE_FIELD_TYPES[0]);
 
-            $content = file_get_contents($this->getTargetPath());
             $rootNamespace = $this->rootNamespace;
+
+            $content = $this->firstTime ?
+                $this->parseTemplate($this->yamlTemplatePath) :
+                file_get_contents($this->getTargetPath());
 
             $content .= $this->parseTemplate(
                 $this->templatePath,

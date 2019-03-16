@@ -109,7 +109,7 @@ abstract class CustomMaker extends AbstractMaker
         $this->io->writeln('');
     }
 
-    public function parseTemplate(string $templatePath, array $parameters): string
+    public function parseTemplate(string $templatePath, array $parameters = []): string
     {
         ob_start();
         extract($parameters, EXTR_SKIP);

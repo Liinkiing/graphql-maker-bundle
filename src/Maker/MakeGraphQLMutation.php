@@ -11,7 +11,6 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class MakeGraphQLMutation extends CustomMaker
 {
@@ -24,6 +23,8 @@ class MakeGraphQLMutation extends CustomMaker
         "@=hasPermission(object, 'OWNER')"
     ];
     private const EXPRESSION_LANGUAGE_DOC_URL = 'https://github.com/overblog/GraphQLBundle/blob/master/docs/definitions/expression-language.md';
+    private $firstTime = false;
+    private $mutationYamlTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.yaml.tpl.php';
     private $mutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.fragment.tpl.php';
     private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.types.tpl.php';
     private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.types.tpl.php';
@@ -61,14 +62,13 @@ class MakeGraphQLMutation extends CustomMaker
         if (!file_exists($this->getMutationTargetPath())) {
             $this->mutationFilename = 'Mutation.types.yml';
             if (!file_exists($this->getMutationTargetPath())) {
-                throw new FileNotFoundException('You must create your Mutation type file before adding new mutations');
+                $this->firstTime = true;
             }
         }
 
         $command
             ->setDescription('Creates a new GraphQL mutation')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'))
-        ;
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'));
     }
 
     /**
@@ -114,8 +114,9 @@ class MakeGraphQLMutation extends CustomMaker
                 );
             }
 
-
-            $content = file_get_contents($this->getMutationTargetPath());
+            $content = $this->firstTime ?
+                $this->parseTemplate($this->mutationYamlTemplatePath) :
+                file_get_contents($this->getMutationTargetPath());
 
             $inputName = ucfirst($mutationName) . 'Input';
             $payloadName = ucfirst($mutationName) . 'Payload';
@@ -135,7 +136,7 @@ class MakeGraphQLMutation extends CustomMaker
 
             $this->writelnSpaced("Now, let's configure $payloadName!");
             $this->generateMutationPayload($generator, $payloadName, $mutationName);
-            $fcn = $this->rootNamespace."\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
+            $fcn = $this->rootNamespace . "\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
             $generatePhpFiles = $this->askConfirmationQuestion(
                 "Do you want to generate the PHP mutation <fg=yellow>$fcn</>"
             );
