@@ -15,9 +15,23 @@ class GraphQLMakerExtension extends Extension
     /**
      * {@inheritdoc}
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('makers.xml');
+
+        $configuration = $this->getConfiguration($configs, $container);
+        $config = $this->processConfiguration($configuration, $configs);
+
+        foreach ($container->getDefinitions() as $definition) {
+            if ($definition->hasTag('maker.graphql_command')) {
+                $definition->replaceArgument(0, $config['root_namespace']);
+            }
+        }
+    }
+
+    public function getAlias(): string
+    {
+        return Configuration::NAME;
     }
 }

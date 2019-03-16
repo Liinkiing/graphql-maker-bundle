@@ -18,9 +18,11 @@ abstract class CustomMaker extends AbstractMaker
      */
     protected $io;
     protected $rootDir;
+    protected $rootNamespace;
 
-    public function __construct(string $rootDir)
+    public function __construct(string $rootNamespace, string $rootDir)
     {
+        $this->rootNamespace = $rootNamespace;
         $this->rootDir = $rootDir;
     }
 
@@ -60,21 +62,7 @@ abstract class CustomMaker extends AbstractMaker
             $defaultType = self::AVAILABLE_FIELD_TYPES[3];
         }
 
-        $type = null;
-        $allValidTypes = self::AVAILABLE_FIELD_TYPES;
-        while (null === $type) {
-            $question = new Question('Field type (enter <comment>?</comment> to see all types)', $defaultType);
-            $question->setAutocompleterValues($allValidTypes);
-            $type = str_replace('!', '', $this->io->askQuestion($question));
-
-            if ('?' === $type) {
-                $this->printAvailableTypes();
-                $this->io->writeln('');
-
-                $type = null;
-            }
-        }
-        $nullable = $this->io->confirm('Can this field be nullable', false);
+        [$type, $nullable] = $this->askFieldType($defaultType);
         $description = $this->askQuestion('Field description?', "I am the $name description");
 
         return compact('name', 'type', 'description', 'nullable');
@@ -128,5 +116,26 @@ abstract class CustomMaker extends AbstractMaker
         include $templatePath;
 
         return ob_get_clean();
+    }
+
+    protected function askFieldType(string $defaultType): array
+    {
+        $type = null;
+        $allValidTypes = self::AVAILABLE_FIELD_TYPES;
+        while (null === $type) {
+            $question = new Question('Field type (enter <comment>?</comment> to see all types)', $defaultType);
+            $question->setAutocompleterValues($allValidTypes);
+            $type = str_replace('!', '', $this->io->askQuestion($question));
+
+            if ('?' === $type) {
+                $this->printAvailableTypes();
+                $this->io->writeln('');
+
+                $type = null;
+            }
+        }
+        $nullable = $this->io->confirm('Can this field be nullable', false);
+
+        return [$type, $nullable];
     }
 }
