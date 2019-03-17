@@ -2,6 +2,7 @@
 
 namespace Liinkiing\GraphQLMakerBundle\Maker;
 
+use Liinkiing\GraphQLMakerBundle\Utils\Str;
 use Liinkiing\GraphQLMakerBundle\Utils\Validator;
 use Overblog\GraphQLBundle\OverblogGraphQLBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -119,7 +120,7 @@ class MakeGraphQLMutation extends CustomMaker
 
             $inputName = ucfirst($mutationName) . 'Input';
             $payloadName = ucfirst($mutationName) . 'Payload';
-            $rootNamespace = $this->rootNamespace;
+            $rootNamespace = Str::normalizeNamespace($this->rootNamespace);
 
             $content .= $this->parseTemplate(
                 $this->mutationTemplatePath,
@@ -135,7 +136,7 @@ class MakeGraphQLMutation extends CustomMaker
 
             $this->writelnSpaced("Now, let's configure $payloadName!");
             $this->generateMutationPayload($generator, $payloadName, $mutationName);
-            $fcn = $this->rootNamespace . "\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
+            $fcn = $rootNamespace . "\\Mutation\\" . ucfirst($mutationName) . 'Mutation';
             $generatePhpFiles = $this->askConfirmationQuestion(
                 "Do you want to generate the PHP mutation <fg=yellow>$fcn</>"
             );

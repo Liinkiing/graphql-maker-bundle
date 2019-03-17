@@ -2,7 +2,7 @@
 
 namespace Liinkiing\GraphQLMakerBundle\Maker;
 
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Liinkiing\GraphQLMakerBundle\Utils\Str;
 use Overblog\GraphQLBundle\OverblogGraphQLBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -91,7 +91,7 @@ class MakeGraphQLQuery extends CustomMaker
             );
             [$type, $nullable] = $this->askFieldType(self::AVAILABLE_FIELD_TYPES[0]);
 
-            $rootNamespace = $this->rootNamespace;
+            $rootNamespace = Str::normalizeNamespace($this->rootNamespace);
 
             $content = $this->firstTime ?
                 $this->parseTemplate($this->yamlTemplatePath) :
@@ -106,7 +106,7 @@ class MakeGraphQLQuery extends CustomMaker
                 $content
             );
 
-            $fcn = $this->rootNamespace."\\Resolver\\" . ucfirst($name) . 'Resolver';
+            $fcn = Str::normalizeNamespace($this->rootNamespace."\\Resolver\\Query\\" . ucfirst($name) . 'Resolver');
             $generatePhpFiles = $this->askConfirmationQuestion(
                 "Do you want to generate the PHP resolver <fg=yellow>$fcn</>"
             );
