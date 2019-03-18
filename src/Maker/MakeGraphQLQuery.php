@@ -11,6 +11,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class MakeGraphQLQuery extends CustomMaker
 {
@@ -21,9 +22,9 @@ class MakeGraphQLQuery extends CustomMaker
     private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
     private $filename = 'Query.types.yaml';
 
-    private function getTargetPath(): string
+    private function getTargetPath(?string $schema): string
     {
-        return $this->outdir . DIRECTORY_SEPARATOR . $this->filename;
+        return ($this->schemaOutDir ?? $this->outdir) . DIRECTORY_SEPARATOR . $this->createNameBasedOnSchema($schema, $this->filename);
     }
 
 
@@ -58,7 +59,9 @@ class MakeGraphQLQuery extends CustomMaker
 
         $command
             ->setDescription('Creates a new GraphQL query')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a query name (e.g. <fg=yellow>allPosts</>)'));
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a query name (e.g. <fg=yellow>allPosts</>)'))
+            ->addOption('schema', 's', InputOption::VALUE_OPTIONAL, 'Specify your GraphQL schema (e.g internal, preview, public)')
+        ;
     }
 
     /**
@@ -83,6 +86,8 @@ class MakeGraphQLQuery extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
+        $schema = $input->getOption('schema');
+        $this->schemaOutDir = $this->getSchemaOutDir($schema);
         $name = $input->getArgument('name');
 
         if ($name) {
@@ -95,15 +100,15 @@ class MakeGraphQLQuery extends CustomMaker
             $rootNamespace = Str::normalizeNamespace($this->rootNamespace);
 
             $content = $this->firstTime ?
-                $this->parseTemplate($this->yamlTemplatePath) :
-                file_get_contents($this->getTargetPath());
+                $this->parseTemplate($this->yamlTemplatePath, compact('schema')) :
+                file_get_contents($this->getTargetPath($schema));
 
             $content .= $this->parseTemplate(
                 $this->templatePath,
                 compact('name', 'description', 'rootNamespace', 'type', 'nullable')
             );
             $generator->dumpFile(
-                $this->getTargetPath(),
+                $this->getTargetPath($schema),
                 $content
             );
 

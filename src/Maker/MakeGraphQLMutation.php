@@ -12,6 +12,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class MakeGraphQLMutation extends CustomMaker
 {
@@ -34,17 +35,17 @@ class MakeGraphQLMutation extends CustomMaker
 
     private function getTargetPath(): string
     {
-        return $this->outdir . DIRECTORY_SEPARATOR . $this->filename;
+        return ($this->schemaOutDir ??$this->outdir) . DIRECTORY_SEPARATOR . $this->filename;
     }
 
     private function getInputTargetPath(string $name): string
     {
-        return $this->outdir . DIRECTORY_SEPARATOR . "$name.types.yaml";
+        return ($this->schemaOutDir ??$this->outdir) . DIRECTORY_SEPARATOR . "$name.types.yaml";
     }
 
     private function getPayloadTargetPath(string $name): string
     {
-        return $this->outdir . DIRECTORY_SEPARATOR . "$name.types.yaml";
+        return ($this->schemaOutDir ??$this->outdir) . DIRECTORY_SEPARATOR . "$name.types.yaml";
     }
 
 
@@ -69,17 +70,11 @@ class MakeGraphQLMutation extends CustomMaker
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        if (!file_exists($this->getTargetPath())) {
-            $this->filename = 'Mutation.types.yml';
-            if (!file_exists($this->getTargetPath())) {
-                $this->filename = 'Mutation.types.yaml';
-                $this->firstTime = true;
-            }
-        }
-
         $command
             ->setDescription('Creates a new GraphQL mutation')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'));
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a mutation name (e.g. <fg=yellow>addPost</>)'))
+            ->addOption('schema', 's', InputOption::VALUE_OPTIONAL, 'Specify your GraphQL schema (e.g internal, preview, public)')
+        ;
     }
 
     /**
@@ -104,6 +99,16 @@ class MakeGraphQLMutation extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
+        $schema = $input->getOption('schema');
+        $this->schemaOutDir = $this->getSchemaOutDir($schema);
+
+        if (!file_exists($this->getTargetPath())) {
+            $this->filename = 'Mutation.types.yml';
+            if (!file_exists($this->getTargetPath())) {
+                $this->filename = 'Mutation.types.yaml';
+                $this->firstTime = true;
+            }
+        }
         $mutationName = $input->getArgument('name');
 
         if ($mutationName) {
@@ -126,11 +131,11 @@ class MakeGraphQLMutation extends CustomMaker
             }
 
             $content = $this->firstTime ?
-                $this->parseTemplate($this->mutationYamlTemplatePath) :
+                $this->parseTemplate($this->mutationYamlTemplatePath, compact('schema')) :
                 file_get_contents($this->getTargetPath());
 
-            $inputName = ucfirst($mutationName) . 'Input';
-            $payloadName = ucfirst($mutationName) . 'Payload';
+            $inputName = $this->createNameBasedOnSchema($schema, $mutationName. 'Input');
+            $payloadName = $this->createNameBasedOnSchema($schema, $mutationName. 'Payload');
             $rootNamespace = Str::normalizeNamespace($this->rootNamespace);
 
             $content .= $this->parseTemplate(

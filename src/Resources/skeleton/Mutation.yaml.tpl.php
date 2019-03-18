@@ -1,4 +1,4 @@
-Mutation:<?= "\n" ?>
+<?= $schema ? ucfirst($schema) : '' ?>Mutation:<?= "\n" ?>
   type: object<?= "\n" ?>
   config:<?= "\n" ?>
     name: Mutation<?= "\n" ?>

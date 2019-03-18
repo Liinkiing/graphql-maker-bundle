@@ -21,6 +21,7 @@ abstract class CustomMaker extends AbstractMaker
     protected $rootDir;
     protected $rootNamespace;
     protected $outdir;
+    protected $schemaOutDir;
     protected $schemas;
 
     public function __construct(string $rootNamespace, string $outdir, array $schemas, string $rootDir)
@@ -38,6 +39,22 @@ abstract class CustomMaker extends AbstractMaker
             $this->io->writeln("  - <fg=yellow>$FIELD_TYPE</> (or <fg=yellow>[$FIELD_TYPE]</>)");
         }
         $this->io->writeln('');
+    }
+
+    protected function createNameBasedOnSchema(?string $schema, string $name): string
+    {
+        $result = $schema ? ucfirst($schema) : '';
+        $result .= ucfirst($name);
+
+        return $result;
+    }
+
+    protected function getSchemaOutDir(?string $schema): ?string
+    {
+        if (!$schema || !isset($this->schemas[$schema])) {
+            return null;
+        }
+        return $this->schemas[$schema]['out_dir'];
     }
 
     protected function askForNextField(bool $isFirstField): ?array

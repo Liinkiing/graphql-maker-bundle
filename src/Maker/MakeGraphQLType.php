@@ -10,6 +10,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class MakeGraphQLType extends CustomMaker
 {
@@ -29,7 +30,7 @@ class MakeGraphQLType extends CustomMaker
 
     private function getTargetPath(string $name): string
     {
-        return $this->outdir.DIRECTORY_SEPARATOR.$name;
+        return ($this->schemaOutDir ?? $this->outdir).DIRECTORY_SEPARATOR.$name;
     }
 
     /**
@@ -45,7 +46,9 @@ class MakeGraphQLType extends CustomMaker
     {
         $command
             ->setDescription('Creates a new GraphQL type')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a type name (e.g. <fg=yellow>Post</>)'));
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a type name (e.g. <fg=yellow>Post</>)'))
+            ->addOption('schema', 's', InputOption::VALUE_OPTIONAL, 'Specify your GraphQL schema (e.g internal, preview, public)')
+        ;
     }
 
     /**
@@ -69,6 +72,7 @@ class MakeGraphQLType extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
+        $this->schemaOutDir = $this->getSchemaOutDir($input->getOption('schema'));
         $name = ucfirst($input->getArgument('name'));
         if ($name) {
             $firstTime = !file_exists($this->getTargetPath($name.'.types.yaml'))

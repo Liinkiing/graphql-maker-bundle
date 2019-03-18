@@ -11,13 +11,14 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class MakeGraphQLConnection extends CustomMaker
 {
 
     private function getTargetPath(string $name): string
     {
-        return $this->outdir . DIRECTORY_SEPARATOR . $name;
+        return ($this->schemaOutDir ?? $this->outdir) . DIRECTORY_SEPARATOR . $name;
     }
 
     /**
@@ -43,7 +44,9 @@ class MakeGraphQLConnection extends CustomMaker
     {
         $command
             ->setDescription('Creates a new relay-compliant GraphQL connection')
-            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a connection name (e.g. <fg=yellow>PostConnection</>)'));
+            ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a connection name (e.g. <fg=yellow>PostConnection</>)'))
+            ->addOption('schema', 's', InputOption::VALUE_OPTIONAL, 'Specify your GraphQL schema (e.g internal, preview, public)')
+        ;
     }
 
     /**
@@ -67,7 +70,9 @@ class MakeGraphQLConnection extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
-        $name = ucfirst($input->getArgument('name'));
+        $this->schemaOutDir = $this->getSchemaOutDir($input->getOption('schema'));
+        $name = $this->createNameBasedOnSchema($this->schemaOutDir, $input->getArgument('name'));
+
         if (!Str::hasSuffix($name, 'Connection')) {
             $name .= 'Connection';
         }
