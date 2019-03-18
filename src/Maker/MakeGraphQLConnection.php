@@ -15,6 +15,11 @@ use Symfony\Component\Console\Input\InputInterface;
 class MakeGraphQLConnection extends CustomMaker
 {
 
+    private function getTargetPath(string $name): string
+    {
+        return $this->outdir . DIRECTORY_SEPARATOR . $name;
+    }
+
     /**
      * Return the command name for your maker (e.g. make:report).
      *
@@ -92,7 +97,7 @@ class MakeGraphQLConnection extends CustomMaker
             }
 
             $generator->generateFile(
-                "config/graphql/types/{$name}.types.yaml",
+                $this->getTargetPath($name),
                 __DIR__ . '/../Resources/skeleton/Connection.types.tpl.php',
                 [
                     'name' => $name,

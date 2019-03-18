@@ -20,11 +20,15 @@ abstract class CustomMaker extends AbstractMaker
     protected $typesPath = 'config/graphql/types/';
     protected $rootDir;
     protected $rootNamespace;
+    protected $outdir;
+    protected $schemas;
 
-    public function __construct(string $rootNamespace, string $rootDir)
+    public function __construct(string $rootNamespace, string $outdir, array $schemas, string $rootDir)
     {
         $this->rootNamespace = $rootNamespace;
         $this->rootDir = $rootDir;
+        $this->outdir = $outdir;
+        $this->schemas = $schemas;
     }
 
     protected function printAvailableTypes(): void

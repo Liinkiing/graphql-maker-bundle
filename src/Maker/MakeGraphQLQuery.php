@@ -19,11 +19,11 @@ class MakeGraphQLQuery extends CustomMaker
     private $templatePath = __DIR__ . '/../Resources/skeleton/Query.fragment.tpl.php';
     private $yamlTemplatePath = __DIR__ . '/../Resources/skeleton/Query.yaml.tpl.php';
     private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
-    private $targetPath = 'config/graphql/types/Query.types.yaml';
+    private $filename = 'Query.types.yaml';
 
     private function getTargetPath(): string
     {
-        return $this->rootDir . DIRECTORY_SEPARATOR . $this->targetPath;
+        return $this->outdir . DIRECTORY_SEPARATOR . $this->filename;
     }
 
 
@@ -49,8 +49,9 @@ class MakeGraphQLQuery extends CustomMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         if (!file_exists($this->getTargetPath())) {
-            $this->targetPath = 'config/graphql/types/Query.types.yml';
+            $this->filename = 'Query.types.yml';
             if (!file_exists($this->getTargetPath())) {
+                $this->filename = 'Query.types.yaml';
                 $this->firstTime = true;
             }
         }
@@ -102,7 +103,7 @@ class MakeGraphQLQuery extends CustomMaker
                 compact('name', 'description', 'rootNamespace', 'type', 'nullable')
             );
             $generator->dumpFile(
-                $this->targetPath,
+                $this->getTargetPath(),
                 $content
             );
 

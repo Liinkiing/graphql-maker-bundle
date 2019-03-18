@@ -27,9 +27,9 @@ class MakeGraphQLType extends CustomMaker
         return 'make:graphql:type';
     }
 
-    private function getTypesPath(): string
+    private function getTargetPath(string $name): string
     {
-        return $this->rootDir.DIRECTORY_SEPARATOR.$this->typesPath;
+        return $this->outdir.DIRECTORY_SEPARATOR.$name;
     }
 
     /**
@@ -71,10 +71,10 @@ class MakeGraphQLType extends CustomMaker
         $this->io = $io;
         $name = ucfirst($input->getArgument('name'));
         if ($name) {
-            $firstTime = !file_exists($this->getTypesPath().$name.'.types.yaml')
-                && !file_exists($this->getTypesPath().$name.'.types.yml');
+            $firstTime = !file_exists($this->getTargetPath($name.'.types.yaml'))
+                && !file_exists($this->getTargetPath($name.'.types.yml'));
             $filename = "$name.types.yaml";
-            if (file_exists($this->getTypesPath().$name.'.types.yml')) {
+            if (file_exists($this->getTargetPath($name.'.types.yml'))) {
                 $filename = "$name.types.yml";
             }
             if ($firstTime) {
@@ -131,7 +131,7 @@ class MakeGraphQLType extends CustomMaker
                             function ($item) { return $item !== ''; })                ]
 
                 ) :
-                file_get_contents($this->getTypesPath().$filename);
+                file_get_contents($this->getTargetPath($filename));
 
             $content .= $this->parseTemplate(
                 $this->typeFieldsTemplatePath,
@@ -139,7 +139,7 @@ class MakeGraphQLType extends CustomMaker
             );
 
             $generator->dumpFile(
-                $this->getTypesPath().$filename,
+                $this->getTargetPath($filename),
                 $content
             );
 

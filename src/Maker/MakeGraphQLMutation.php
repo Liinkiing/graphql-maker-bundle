@@ -30,11 +30,21 @@ class MakeGraphQLMutation extends CustomMaker
     private $inputTemplatePath = __DIR__ . '/../Resources/skeleton/Input.types.tpl.php';
     private $payloadTemplatePath = __DIR__ . '/../Resources/skeleton/Payload.types.tpl.php';
     private $phpMutationTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
-    private $mutationFilename = 'Mutation.types.yaml';
+    private $filename = 'Mutation.types.yaml';
 
-    private function getMutationTargetPath(): string
+    private function getTargetPath(): string
     {
-        return $this->rootDir . DIRECTORY_SEPARATOR . $this->typesPath . $this->mutationFilename;
+        return $this->outdir . DIRECTORY_SEPARATOR . $this->filename;
+    }
+
+    private function getInputTargetPath(string $name): string
+    {
+        return $this->outdir . DIRECTORY_SEPARATOR . "$name.types.yaml";
+    }
+
+    private function getPayloadTargetPath(string $name): string
+    {
+        return $this->outdir . DIRECTORY_SEPARATOR . "$name.types.yaml";
     }
 
 
@@ -59,9 +69,10 @@ class MakeGraphQLMutation extends CustomMaker
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        if (!file_exists($this->getMutationTargetPath())) {
-            $this->mutationFilename = 'Mutation.types.yml';
-            if (!file_exists($this->getMutationTargetPath())) {
+        if (!file_exists($this->getTargetPath())) {
+            $this->filename = 'Mutation.types.yml';
+            if (!file_exists($this->getTargetPath())) {
+                $this->filename = 'Mutation.types.yaml';
                 $this->firstTime = true;
             }
         }
@@ -116,7 +127,7 @@ class MakeGraphQLMutation extends CustomMaker
 
             $content = $this->firstTime ?
                 $this->parseTemplate($this->mutationYamlTemplatePath) :
-                file_get_contents($this->getMutationTargetPath());
+                file_get_contents($this->getTargetPath());
 
             $inputName = ucfirst($mutationName) . 'Input';
             $payloadName = ucfirst($mutationName) . 'Payload';
@@ -127,7 +138,7 @@ class MakeGraphQLMutation extends CustomMaker
                 compact('access', 'hasAccess', 'rootNamespace', 'mutationName', 'description', 'inputName', 'payloadName')
             );
             $generator->dumpFile(
-                $this->getMutationTargetPath(),
+                $this->getTargetPath(),
                 $content
             );
 
@@ -186,7 +197,7 @@ class MakeGraphQLMutation extends CustomMaker
         }
 
         $generator->generateFile(
-            $this->typesPath . $inputName . '.types.yaml',
+            $this->getInputTargetPath($inputName),
             $this->inputTemplatePath,
             compact('inputName', 'inputFields', 'inputDescription')
         );
@@ -214,7 +225,7 @@ class MakeGraphQLMutation extends CustomMaker
         }
 
         $generator->generateFile(
-            $this->typesPath . $payloadName . '.types.yaml',
+            $this->getPayloadTargetPath($payloadName),
             $this->payloadTemplatePath,
             compact('payloadName', 'payloadFields', 'payloadDescription')
         );

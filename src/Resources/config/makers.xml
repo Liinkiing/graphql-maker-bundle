@@ -9,24 +9,32 @@
 
         <service id="maker.graphql.type" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLType">
             <argument /> <!-- root namespace -->
+            <argument /> <!-- out dir -->
+            <argument /> <!-- schemas -->
             <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
             <tag name="maker.graphql_command" />
         </service>
         <service id="maker.graphql.connection" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLConnection">
             <argument /> <!-- root namespace -->
+            <argument /> <!-- out dir -->
+            <argument /> <!-- schemas -->
             <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
             <tag name="maker.graphql_command" />
         </service>
         <service id="maker.graphql.query" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLQuery">
             <argument /> <!-- root namespace -->
+            <argument /> <!-- out dir -->
+            <argument /> <!-- schemas -->
             <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
             <tag name="maker.graphql_command" />
         </service>
         <service id="maker.graphql.mutation" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLMutation">
             <argument /> <!-- root namespace -->
+            <argument /> <!-- out dir -->
+            <argument /> <!-- schemas -->
             <argument>%kernel.project_dir%</argument>
             <tag name="maker.command" />
             <tag name="maker.graphql_command" />
