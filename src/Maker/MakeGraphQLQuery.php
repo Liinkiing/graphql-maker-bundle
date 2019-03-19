@@ -49,14 +49,6 @@ class MakeGraphQLQuery extends CustomMaker
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        if (!file_exists($this->getTargetPath())) {
-            $this->filename = 'Query.types.yml';
-            if (!file_exists($this->getTargetPath())) {
-                $this->filename = 'Query.types.yaml';
-                $this->firstTime = true;
-            }
-        }
-
         $command
             ->setDescription('Creates a new GraphQL query')
             ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a query name (e.g. <fg=yellow>allPosts</>)'))
@@ -90,6 +82,14 @@ class MakeGraphQLQuery extends CustomMaker
         $this->schemaOutDir = $this->getSchemaOutDir($schema);
         $name = $input->getArgument('name');
 
+        if (!file_exists($this->getTargetPath($schema))) {
+            $this->filename = 'Query.types.yml';
+            if (!file_exists($this->getTargetPath($schema))) {
+                $this->filename = 'Query.types.yaml';
+                $this->firstTime = true;
+            }
+        }
+
         if ($name) {
             $description = $this->askQuestion(
                 'What is your query description?',
@@ -99,23 +99,24 @@ class MakeGraphQLQuery extends CustomMaker
 
             $rootNamespace = Str::normalizeNamespace($this->rootNamespace);
 
+            $fcn = Str::normalizeNamespace($this->rootNamespace."\\Resolver\\Query\\" . ucfirst($name) . 'Resolver');
+            $generatePhpFiles = $this->askConfirmationQuestion(
+                "Do you want to generate the PHP resolver <fg=yellow>$fcn</>"
+            );
+
             $content = $this->firstTime ?
                 $this->parseTemplate($this->yamlTemplatePath, compact('schema')) :
                 file_get_contents($this->getTargetPath($schema));
 
             $content .= $this->parseTemplate(
                 $this->templatePath,
-                compact('name', 'description', 'rootNamespace', 'type', 'nullable')
+                compact('name', 'description', 'rootNamespace', 'type', 'nullable', 'generatePhpFiles')
             );
             $generator->dumpFile(
                 $this->getTargetPath($schema),
                 $content
             );
 
-            $fcn = Str::normalizeNamespace($this->rootNamespace."\\Resolver\\Query\\" . ucfirst($name) . 'Resolver');
-            $generatePhpFiles = $this->askConfirmationQuestion(
-                "Do you want to generate the PHP resolver <fg=yellow>$fcn</>"
-            );
 
             if ($generatePhpFiles) {
                 $generator->generateClass(
