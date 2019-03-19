@@ -1,9 +1,10 @@
-<?= $name ?>:<?= "\n" ?>
+<?= $schema ? ucfirst($schema) : '' ?><?= $name ?>:<?= "\n" ?>
   type: <?= "$type\n" ?>
 <?php if ($inherits && count($inherits) > 0) { ?>
   inherits: [<?= implode(', ', array_map(function ($item) { return "'$item'"; }, $inherits)) ?>]<?= "\n" ?>
 <?php } ?>
   config:<?= "\n" ?>
+    name: <?= $name ?><?= "\n" ?>
 <?php if ($interfaces && count($interfaces) > 0) { ?>
     interfaces: [<?= implode(', ', array_map(function ($item) { return "'$item'"; }, $interfaces)) ?>]<?= "\n" ?>
 <?php } ?>

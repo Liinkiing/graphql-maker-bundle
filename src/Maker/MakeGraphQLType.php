@@ -72,12 +72,15 @@ class MakeGraphQLType extends CustomMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $this->io = $io;
-        $this->schemaOutDir = $this->getSchemaOutDir($input->getOption('schema'));
+        $schema = $input->getOption('schema');
+        $this->schemaOutDir = $this->getSchemaOutDir($schema);
         $name = ucfirst($input->getArgument('name'));
+
         if ($name) {
             $firstTime = !file_exists($this->getTargetPath($name.'.types.yaml'))
                 && !file_exists($this->getTargetPath($name.'.types.yml'));
-            $filename = "$name.types.yaml";
+            $filename = $schema ? ucfirst($schema) : '';
+            $filename .= "$name.types.yaml";
             if (file_exists($this->getTargetPath($name.'.types.yml'))) {
                 $filename = "$name.types.yml";
             }
@@ -122,6 +125,7 @@ class MakeGraphQLType extends CustomMaker
                 $this->parseTemplate(
                     $this->typeTemplatePath,
                     [
+                        'schema' => $schema,
                         'name' => $name,
                         'type' => $type,
                         'description' => $description,
