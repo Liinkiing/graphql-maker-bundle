@@ -19,7 +19,7 @@ class MakeGraphQLQuery extends CustomMaker
     private $firstTime = false;
     private $templatePath = __DIR__ . '/../Resources/skeleton/Query.fragment.tpl.php';
     private $yamlTemplatePath = __DIR__ . '/../Resources/skeleton/Query.yaml.tpl.php';
-    private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Mutation.tpl.php';
+    private $phpResolverTemplatePath = __DIR__ . '/../Resources/skeleton/Resolver.tpl.php';
     private $filename = 'Query.types.yaml';
 
     private function getTargetPath(?string $schema): string
