@@ -9,6 +9,10 @@
       "name": "Omar Jbara <omar.jbara2@gmail.com>"
     }
   ],
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
   "require": {
     "php": "^7.0.8",
     "symfony/config": "^3.4|^4.0",
