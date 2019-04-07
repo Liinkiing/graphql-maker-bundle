@@ -18,7 +18,7 @@ class MakeGraphQLConnection extends CustomMaker
 
     private function getTargetPath(string $name): string
     {
-        return ($this->schemaOutDir ?? $this->outdir) . DIRECTORY_SEPARATOR . $name;
+        return ($this->schemaOutDir ?? $this->outdir) . DIRECTORY_SEPARATOR . $name . '.yaml';
     }
 
     /**
