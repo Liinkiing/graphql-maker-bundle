@@ -31,6 +31,15 @@ class GraphQLMakerExtension extends Extension
                     // for `resolve` value in generated queries and mutations
                     str_replace('\\', '\\\\', $config['root_namespace'])
                 );
+                $definition->replaceArgument(
+                    1,
+                    $config['out_dir']
+                );
+
+                $definition->replaceArgument(
+                    2,
+                    $config['schemas']
+                );
             }
         }
     }
