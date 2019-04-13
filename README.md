@@ -41,3 +41,20 @@ graphql_maker:
     preview:
       out_dir: '%kernel.project_dir%/config/graphql/preview/types'
 ```
+
+## Usage
+Currently, you can generate:
+- type
+- connection
+- query
+- mutation
+
+```bash
+$ bin/console make:graphql:type       [--schema]
+$ bin/console make:graphql:connection [--schema]
+$ bin/console make:graphql:query      [--schema]
+$ bin/console make:graphql:mutation   [--schema]
+
+```
+
+Then, you will be asked some questions to generate what you asked, *à la Maker*
