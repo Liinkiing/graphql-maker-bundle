@@ -15,6 +15,14 @@
             <tag name="maker.command" />
             <tag name="maker.graphql_command" />
         </service>
+        <service id="maker.graphql.resolver" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLResolver">
+            <argument /> <!-- root namespace -->
+            <argument /> <!-- out dir -->
+            <argument /> <!-- schemas -->
+            <argument>%kernel.project_dir%</argument>
+            <tag name="maker.command" />
+            <tag name="maker.graphql_command" />
+        </service>
         <service id="maker.graphql.connection" class="Liinkiing\GraphQLMakerBundle\Maker\MakeGraphQLConnection">
             <argument /> <!-- root namespace -->
             <argument /> <!-- out dir -->
