@@ -20,7 +20,7 @@
     "symfony/dependency-injection": "^3.4|^4.0",
     "symfony/maker-bundle": "^1.11.0",
     "symfony/http-kernel": "^3.4|^4.0",
-    "overblog/graphql-bundle": "^0.11.0"
+    "overblog/graphql-bundle": "^0.11.0|^0.12.0"
   },
   "autoload": {
     "psr-4": { "Liinkiing\\GraphQLMakerBundle\\": "src/" }
